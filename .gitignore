@@ -26,6 +26,13 @@ go.work.sum
 
 # env file
 .env
+config.toml
+
+# Node/Bun stuff
+dist/
+node_modules/
+package-lock.json
+bun.lockb
 
 # Editor/IDE
 # .idea/
