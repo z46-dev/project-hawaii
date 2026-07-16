@@ -21,3 +21,8 @@ This project is built with a server and a client. The server processes replays, 
 - As any type of user, I should be able to browse the database of clans and their playstyles, so I can learn from other teams and improve my own gameplay, and prepare to fight against them in future battles.
 - As a clan battle caller, I want to be able be able to get a recommandation of what an enemy team may do based on the current map, their clan, and their composition.
 - As an administrator, I want to be able to manage user accounts, uploaded replays, and manage the database to ensure the system is running smoothly.
+
+## Tech Stack
+
+- **Backend**: Go, SQLite, Go Fiber, OpenAI-like API (LM Studio)
+- 

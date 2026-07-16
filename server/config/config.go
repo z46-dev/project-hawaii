@@ -9,14 +9,14 @@ import (
 type Config struct {
 	WebServer struct {
 		BindAddress     string   `toml:"bind_address" default:"[::]:1944" validate:"required"`
-		AcceptedOrigins []string `toml:"accepted_origins" default:"http://localhost:3000" validate:"required"`
+		AcceptedOrigins []string `toml:"accepted_origins" default:"[\"http://localhost:3000\"]" validate:"required"`
 	} `toml:"web_server"`
 	Database struct {
 		FilePath string `toml:"file_path" default:"./hawaii-sqlite.db" validate:"required"`
 	} `toml:"database"`
 	LLMServer struct {
 		OpenAI_Like_API_URL string `toml:"openai_like_api_url" default:"http://localhost:1234/v1" validate:"required"`
-		OpenAI_Like_API_Key string `toml:"openai_like_api_key" default:"" validate:"required"`
+		OpenAI_Like_API_Key string `toml:"openai_like_api_key" default:"your_key" validate:"required"`
 	} `toml:"llm_server"`
 }
 
