@@ -1,0 +1,32 @@
+.field {
+    display: grid;
+    gap: 7px;
+    color: var(--color-text);
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.field input {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 11px;
+    color: var(--color-text);
+    background: var(--color-input);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+}
+
+.field input:focus {
+    border-color: var(--color-primary);
+    outline: 3px solid rgb(47 111 115 / 16%);
+}
+
+.form-note {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 0.9rem;
+}
+
+.form-note-error {
+    color: var(--color-danger);
+}

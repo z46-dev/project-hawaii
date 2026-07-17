@@ -27,6 +27,7 @@ go.work.sum
 # env file
 .env
 config.toml
+*.db
 
 # Node/Bun stuff
 dist/

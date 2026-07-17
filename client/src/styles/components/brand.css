@@ -1,0 +1,19 @@
+.brand-mark {
+    display: grid;
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    color: var(--color-primary-text);
+    background: var(--color-primary);
+    border-radius: 8px;
+}
+
+.app-kicker {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}

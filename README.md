@@ -10,7 +10,7 @@ This project is built with a server and a client. The server processes replays, 
 
 **Replay Processing**: The server processes replays and builds a time-series of data about the battle. This data can be converted to a video on the client, but is not stored as a video on the server.
 
-**AI Analysis**: The server uses AI to analyze the replay data and infer playstyles, calls, value, and other information about the teams/clans. This data is stored in a database and can be queried by clients. This is configured with an OpenAI API style API, so self-hosted LM Studio or other LLMs can be used instead of OpenAI.
+**AI Analysis**: The server uses AI to analyze the replay data and infer playstyles, calls, value, and other information about the teams/clans. This data is stored in a database and can be queried by clients. This is configured with an OpenAPI, so self-hosted LM Studio or other LLMs can be used instead of OpenAI.
 
 ---
 
@@ -24,5 +24,5 @@ This project is built with a server and a client. The server processes replays, 
 
 ## Tech Stack
 
-- **Backend**: Go, SQLite, Go Fiber, OpenAI-like API (LM Studio)
+- **Backend**: Go, SQLite, Go Fiber, OpenAPI (LM Studio)
 - 

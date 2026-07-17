@@ -1,0 +1,30 @@
+.auth-shell {
+    display: grid;
+    min-height: 100vh;
+    place-items: center;
+    padding: 24px;
+}
+
+.auth-panel {
+    width: min(100%, 420px);
+    padding: 32px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    box-shadow: var(--shadow-panel);
+}
+
+.auth-header {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    margin-bottom: 28px;
+}
+
+.auth-header h1 {
+    margin: 2px 0 0;
+    color: var(--color-text);
+    font-size: 1.65rem;
+    line-height: 1.15;
+    letter-spacing: 0;
+}

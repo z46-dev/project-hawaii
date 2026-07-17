@@ -8,7 +8,7 @@ import (
 
 type Config struct {
 	WebServer struct {
-		BindAddress     string   `toml:"bind_address" default:"[::]:1944" validate:"required"`
+		BindAddress     string   `toml:"bind_address" default:"[::]:8000" validate:"required"`
 		AcceptedOrigins []string `toml:"accepted_origins" default:"[\"http://localhost:3000\"]" validate:"required"`
 	} `toml:"web_server"`
 	Database struct {

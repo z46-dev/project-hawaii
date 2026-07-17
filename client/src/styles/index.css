@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+@import "./base/reset.css";
+@import "./base/theme.css";
+@import "./layout/auth-shell.css";
+@import "./components/brand.css";
+@import "./components/buttons.css";
+@import "./components/dashboard-card.css";
+@import "./components/forms.css";
+@import "./pages/dashboard.css";
+@import "./pages/login.css";

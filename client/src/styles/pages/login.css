@@ -1,0 +1,16 @@
+.login-form {
+    display: grid;
+    gap: 16px;
+}
+
+@media (max-width: 520px) {
+    .auth-shell {
+        padding: 16px;
+        place-items: stretch;
+    }
+
+    .auth-panel {
+        align-self: center;
+        padding: 24px;
+    }
+}

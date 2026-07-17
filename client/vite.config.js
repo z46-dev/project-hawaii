@@ -4,18 +4,20 @@ import tailwindcss from "@tailwindcss/vite";
 import { resolve } from "node:path";
 
 export default defineConfig({
+    root: "src",
     plugins: [react(), tailwindcss()],
+    server: {
+        port: 3000,
+        proxy: {
+            "/api": "http://localhost:8000"
+        }
+    },
     build: {
-        outDir: "dist",
+        outDir: "../dist",
         emptyOutDir: true,
         rollupOptions: {
             input: {
-                app: resolve(import.meta.dirname, "index.html"),
-                hitboxGenerator: resolve(import.meta.dirname, "hitboxGenerator/index.html"),
-                mapEditor: resolve(import.meta.dirname, "mapEditor/index.html"),
-                shipEditor: resolve(import.meta.dirname, "shipEditor/index.html"),
-                stats: resolve(import.meta.dirname, "stats/index.html"),
-                turretVisualizer: resolve(import.meta.dirname, "turretVisualizer/index.html")
+                app: resolve(import.meta.dirname, "src/index.html")
             }
         }
     }
