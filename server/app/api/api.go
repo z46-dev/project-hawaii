@@ -6,6 +6,7 @@ import (
 	v1 "github.com/z46-dev/project-hawaii/app/api/v1"
 )
 
+// Init registers API routes on the application.
 func Init(app *fiber.App, _log *golog.Logger) {
 	var apiGroup fiber.Router = app.Group("/api")
 

@@ -2,18 +2,20 @@ package db
 
 import (
 	"fmt"
-	"os"
-	"slices"
 
 	"github.com/z46-dev/gosqlite"
 	"github.com/z46-dev/project-hawaii/config"
 )
 
 var (
-	driver   *gosqlite.Driver
-	Accounts *gosqlite.RegisteredStruct[Account]
+	driver           *gosqlite.Driver
+	Accounts         *gosqlite.RegisteredStruct[Account]
+	Identities       *gosqlite.RegisteredStruct[AccountIdentity]
+	LocalCredentials *gosqlite.RegisteredStruct[LocalCredential]
+	PasswordResets   *gosqlite.RegisteredStruct[PasswordReset]
 )
 
+// registerAndMigrate registers a database type and applies its migrations.
 func registerAndMigrate[T any](opts gosqlite.MigrationOptions) (registered *gosqlite.RegisteredStruct[T], err error) {
 	if registered, err = gosqlite.Register(driver, *new(T)); err != nil {
 		err = fmt.Errorf("failed to register struct: %w", err)
@@ -33,19 +35,34 @@ func registerAndMigrate[T any](opts gosqlite.MigrationOptions) (registered *gosq
 	return
 }
 
-func Init() (err error) {
+// Init opens the database and registers all persisted types.
+func Init(allowDestructiveMigrations bool) (err error) {
 	if driver, err = gosqlite.Begin(config.Conf.Database.FilePath); err != nil {
 		err = fmt.Errorf("failed to initialize database driver: %w", err)
 		return
 	}
 
 	var migrationOpts gosqlite.MigrationOptions = gosqlite.MigrationOptions{
-		AllowDestructive: slices.Contains(os.Args, "--allow-destructive-migrations"),
+		AllowDestructive: allowDestructiveMigrations,
 	}
 
 	if Accounts, err = registerAndMigrate[Account](migrationOpts); err != nil {
 		err = fmt.Errorf("failed to register and migrate Account struct: %w", err)
 		return
+	}
+
+	if Identities, err = registerAndMigrate[AccountIdentity](migrationOpts); err != nil {
+		err = fmt.Errorf("failed to register and migrate AccountIdentity struct: %w", err)
+		return
+	}
+
+	if LocalCredentials, err = registerAndMigrate[LocalCredential](migrationOpts); err != nil {
+		err = fmt.Errorf("failed to register and migrate LocalCredential struct: %w", err)
+		return
+	}
+
+	if PasswordResets, err = registerAndMigrate[PasswordReset](migrationOpts); err != nil {
+		err = fmt.Errorf("failed to register and migrate PasswordReset struct: %w", err)
 	}
 
 	return

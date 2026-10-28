@@ -3,21 +3,27 @@ module github.com/z46-dev/project-hawaii
 go 1.26.2
 
 require (
+	github.com/alexflint/go-arg v1.6.1
+	github.com/coreos/go-oidc/v3 v3.21.0
+	github.com/go-ldap/ldap/v3 v3.4.15
 	github.com/gofiber/fiber/v3 v3.4.0
-	github.com/nlpodyssey/gopickle v0.3.0
 	github.com/z46-dev/goconf v0.0.0-20260527232714-5c4e1d4a89e7
 	github.com/z46-dev/golog v0.0.0-20260324172018-d1a87bbdeb64
 	github.com/z46-dev/gosqlite v0.0.0-20260719175548-e15201acdb53
 	golang.org/x/crypto v0.54.0
-	golang.org/x/image v0.44.0
+	golang.org/x/oauth2 v0.37.0
 )
 
 require (
+	github.com/Azure/go-ntlmssp v0.1.1 // indirect
 	github.com/BurntSushi/toml v1.6.0 // indirect
+	github.com/alexflint/go-scalar v1.2.0 // indirect
 	github.com/andybalholm/brotli v1.2.2 // indirect
 	github.com/creasty/defaults v1.8.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.13 // indirect
+	github.com/go-asn1-ber/asn1-ber v1.5.8 // indirect
+	github.com/go-jose/go-jose/v4 v4.1.4 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.30.3 // indirect

@@ -38,3 +38,7 @@ bun.lockb
 # Editor/IDE
 # .idea/
 # .vscode/
+
+# AI Tooling
+.codex/
+graphify-out/
