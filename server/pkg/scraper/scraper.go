@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
+	"path"
 	"sync"
 
 	"github.com/z46-dev/golog"
@@ -76,6 +78,29 @@ func DownloadReplay(replayID uint) (replayFile *WowsReplayFile, err error) {
 	return
 }
 
+// commonConsumer is a generic function that safely consumes an item from a slice of items using a mutex for synchronization.
+// It returns the consumed item and a boolean indicating whether an item was successfully consumed.
+func commonConsumer[T any](items *[]T, mu *sync.Mutex) (item T, ok bool) {
+	mu.Lock()
+	defer mu.Unlock()
+
+	if len(*items) == 0 {
+		item, ok = *new(T), false
+	} else {
+		item, *items, ok = (*items)[0], (*items)[1:], true
+	}
+
+	return
+}
+
+// commonProducer is a generic function that safely appends an item to a slice of items using a mutex for synchronization.
+func commonProducer[T any](item T, items *[]T, mu *sync.Mutex) {
+	mu.Lock()
+	defer mu.Unlock()
+
+	*items = append(*items, item)
+}
+
 // DownloadReplays downloads multiple .wowsreplay files from replayswows.com given a list of replay IDs and returns a slice of WowsReplayFile structs. The downloads are performed concurrently using the specified number of workers.
 func DownloadReplays(replayIDs []uint, numWorkers uint, printProgressLogger *golog.Logger) (replayFiles []*WowsReplayFile, err error) {
 	numWorkers = min(max(numWorkers, 1), uint(len(replayIDs)))
@@ -96,36 +121,13 @@ func DownloadReplays(replayIDs []uint, numWorkers uint, printProgressLogger *gol
 	for range numWorkers {
 		wg.Go(func() {
 			var (
-				consumeReplayID func() (id uint, ok bool) = func() (id uint, ok bool) {
-					consumeMu.Lock()
-					defer consumeMu.Unlock()
-
-					if len(replayIDs) == 0 {
-						id, ok = 0, false
-					} else {
-						id, replayIDs, ok = replayIDs[0], replayIDs[1:], true
-					}
-
-					return
-				}
-				produceReplayFile func(f *WowsReplayFile) = func(f *WowsReplayFile) {
-					produceMu.Lock()
-					defer produceMu.Unlock()
-
-					replayFiles = append(replayFiles, f)
-					if loader != nil {
-						var done int = len(replayFiles)
-						loader.SetProgress(float64(done) / float64(total))
-						loader.SetMessage(fmt.Sprintf("Downloading replays %d/%d", done, total))
-					}
-				}
 				id       uint
 				ok       bool
 				localErr error
 			)
 
 			for {
-				if id, ok = consumeReplayID(); !ok {
+				if id, ok = commonConsumer(&replayIDs, &consumeMu); !ok {
 					return
 				}
 
@@ -142,7 +144,12 @@ func DownloadReplays(replayIDs []uint, numWorkers uint, printProgressLogger *gol
 				}
 
 				wg.Go(func() {
-					produceReplayFile(replayFile)
+					commonProducer(replayFile, &replayFiles, &produceMu)
+					if loader != nil {
+						var done int = len(replayFiles)
+						loader.SetProgress(float64(done) / float64(total))
+						loader.SetMessage(fmt.Sprintf("Downloading replays %d/%d", done, total))
+					}
 				})
 			}
 		})
@@ -158,5 +165,73 @@ func DownloadReplays(replayIDs []uint, numWorkers uint, printProgressLogger *gol
 		replayFiles = nil
 	}
 
+	return
+}
+
+// SaveReplays saves multiple .wowsreplay files to the specified directory.
+func SaveReplays(replays []*WowsReplayFile, directory string, numWorkers uint, name func(id uint) (fileName string), printProgressLogger *golog.Logger) (err error) {
+	numWorkers = min(max(numWorkers, 1), uint(len(replays)))
+
+	if name == nil {
+		name = func(id uint) (fileName string) {
+			fileName = fmt.Sprintf("replayswows_com_%d.wowsreplay", id)
+			return
+		}
+	}
+
+	var (
+		total            int = len(replays)
+		wg               sync.WaitGroup
+		consumeMu, errMu sync.Mutex
+		loader           *golog.Loader
+	)
+
+	if printProgressLogger != nil {
+		loader = printProgressLogger.Loader(fmt.Sprintf("Saving replays 0/%d", len(replays)), golog.LoaderASCII, 5)
+		loader.Start()
+		defer loader.Stop()
+	}
+
+	// Ensure directory
+	if err = os.MkdirAll(directory, 0755); err != nil {
+		return
+	}
+
+	for range numWorkers {
+		wg.Go(func() {
+			var (
+				replay   *WowsReplayFile
+				ok       bool
+				localErr error
+			)
+
+			for {
+				if replay, ok = commonConsumer(&replays, &consumeMu); !ok {
+					return
+				}
+
+				if localErr = replay.SaveTo(path.Join(directory, name(replay.ID))); localErr != nil {
+					errMu.Lock()
+					defer errMu.Unlock()
+
+					if err == nil {
+						err = fmt.Errorf("failed to save replay ID %d: %+v", replay.ID, localErr)
+					}
+
+					return
+				}
+
+				wg.Go(func() {
+					if loader != nil {
+						var done int = total - len(replays)
+						loader.SetProgress(float64(done) / float64(total))
+						loader.SetMessage(fmt.Sprintf("Saving replays %d/%d", done, total))
+					}
+				})
+			}
+		})
+	}
+
+	wg.Wait()
 	return
 }

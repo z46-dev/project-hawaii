@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"net/url"
-	"os"
 	"time"
 
 	"github.com/z46-dev/gosqlite"
@@ -126,12 +125,6 @@ func runScraper(args CliArguments) {
 	log.Infof("Found %d replays\n", len(replays))
 
 	if args.Scraper.DownloadReplaysTo != "" {
-		// Ensure directory
-		if err = os.MkdirAll(args.Scraper.DownloadReplaysTo, 0755); err != nil {
-			log.Errorf("Failed to create directory %q: %+v\n", args.Scraper.DownloadReplaysTo, err)
-			return
-		}
-
 		// Download
 		var (
 			replayIDs   []uint
@@ -147,11 +140,9 @@ func runScraper(args CliArguments) {
 			return
 		}
 
-		for _, replayFile := range replayFiles {
-			if err = replayFile.SaveTo(fmt.Sprintf("%s/replay_%d.wowsreplay", args.Scraper.DownloadReplaysTo, replayFile.ID)); err != nil {
-				log.Errorf("Failed to save replay ID %d: %+v\n", replayFile.ID, err)
-				continue
-			}
+		if err = scraper.SaveReplays(replayFiles, args.Scraper.DownloadReplaysTo, args.Scraper.ParallelDownloads, nil, log); err != nil {
+			log.Errorf("Failed to save replays: %+v\n", err)
+			return
 		}
 	}
 
@@ -161,18 +152,5 @@ func runScraper(args CliArguments) {
 		} else {
 			log.Infof("Replay ID: %d, Player: %s, Ship: %s, Result: %s, Damage: %d, Frags: %d, Map: %s, Mode: %s, Version: %s\n", replay.ID, replay.PlayerName, replay.Ship.Name, replay.Result.Name, replay.Stats.Damage, replay.Stats.Frags, replay.Scenario.MapName, replay.Scenario.ModeName, replay.Version)
 		}
-
-		// if args.Scraper.DownloadReplaysTo != "" {
-		// 	var replayFile *scraper.WowsReplayFile
-		// 	if replayFile, err = scraper.DownloadReplay(replay.ID); err != nil {
-		// 		log.Errorf("Failed to download replay ID %d: %+v\n", replay.ID, err)
-		// 		continue
-		// 	}
-
-		// 	if err = replayFile.SaveTo(fmt.Sprintf("%s/replay_%d.wowsreplay", args.Scraper.DownloadReplaysTo, replay.ID)); err != nil {
-		// 		log.Errorf("Failed to save replay ID %d: %+v\n", replay.ID, err)
-		// 		continue
-		// 	}
-		// }
 	}
 }
