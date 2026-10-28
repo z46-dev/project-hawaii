@@ -26,7 +26,9 @@ type (
 
 	ScraperArguments struct {
 		Short             bool   `arg:"-s,--short" help:"Prune output to player name, ship name, and result (with damage and frags)"`
+		Count             int    `arg:"-c,--count" default:"0" help:"The number of replays to scrape, 0 for the most recent page"`
 		DownloadReplaysTo string `arg:"-d,--download-replays-to" help:"Download replays to the specified directory"`
+		ParallelDownloads uint   `arg:"-p,--parallel-downloads" default:"4" help:"The number of parallel downloads to perform when downloading replays"`
 	}
 
 	CliArguments struct {

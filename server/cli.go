@@ -105,16 +105,25 @@ func createPasswordResetForAccount(accountID, expirationHours int) {
 
 func runScraper(args CliArguments) {
 	var (
-		response *scraper.APISearchResponse
-		err      error
+		replays []*scraper.APISearchResponseReplay
+		err     error
 	)
 
-	if response, err = scraper.QueryRecentAIReplays(); err != nil {
+	if args.Scraper.Count <= 0 {
+		var response *scraper.APISearchResponse
+		if response, err = scraper.QueryRecentAPIReplays(); response != nil {
+			replays = response.Replays
+		}
+	} else {
+		replays, err = scraper.QueryAPIReplaysByCount(args.Scraper.Count)
+	}
+
+	if err != nil {
 		log.Errorf("Failed to query recent AI replays: %+v\n", err)
 		return
 	}
 
-	log.Infof("Found %d replays\n", len(response.Replays))
+	log.Infof("Found %d replays\n", len(replays))
 
 	if args.Scraper.DownloadReplaysTo != "" {
 		// Ensure directory
@@ -122,26 +131,48 @@ func runScraper(args CliArguments) {
 			log.Errorf("Failed to create directory %q: %+v\n", args.Scraper.DownloadReplaysTo, err)
 			return
 		}
+
+		// Download
+		var (
+			replayIDs   []uint
+			replayFiles []*scraper.WowsReplayFile
+		)
+
+		for _, replay := range replays {
+			replayIDs = append(replayIDs, replay.ID)
+		}
+
+		if replayFiles, err = scraper.DownloadReplays(replayIDs, args.Scraper.ParallelDownloads, log); err != nil {
+			log.Errorf("Failed to download replays: %+v\n", err)
+			return
+		}
+
+		for _, replayFile := range replayFiles {
+			if err = replayFile.SaveTo(fmt.Sprintf("%s/replay_%d.wowsreplay", args.Scraper.DownloadReplaysTo, replayFile.ID)); err != nil {
+				log.Errorf("Failed to save replay ID %d: %+v\n", replayFile.ID, err)
+				continue
+			}
+		}
 	}
 
-	for _, replay := range response.Replays {
+	for _, replay := range replays {
 		if args.Scraper.Short {
 			log.Infof("Replay ID: %d, Player: %s, Ship: %s, Result: %s, Damage: %d, Frags: %d\n", replay.ID, replay.PlayerName, replay.Ship.Name, replay.Result.Name, replay.Stats.Damage, replay.Stats.Frags)
 		} else {
 			log.Infof("Replay ID: %d, Player: %s, Ship: %s, Result: %s, Damage: %d, Frags: %d, Map: %s, Mode: %s, Version: %s\n", replay.ID, replay.PlayerName, replay.Ship.Name, replay.Result.Name, replay.Stats.Damage, replay.Stats.Frags, replay.Scenario.MapName, replay.Scenario.ModeName, replay.Version)
 		}
 
-		if args.Scraper.DownloadReplaysTo != "" {
-			var replayFile *scraper.WowsReplayFile
-			if replayFile, err = scraper.DownloadReplay(replay.ID); err != nil {
-				log.Errorf("Failed to download replay ID %d: %+v\n", replay.ID, err)
-				continue
-			}
+		// if args.Scraper.DownloadReplaysTo != "" {
+		// 	var replayFile *scraper.WowsReplayFile
+		// 	if replayFile, err = scraper.DownloadReplay(replay.ID); err != nil {
+		// 		log.Errorf("Failed to download replay ID %d: %+v\n", replay.ID, err)
+		// 		continue
+		// 	}
 
-			if err = replayFile.SaveTo(fmt.Sprintf("%s/replay_%d.wowsreplay", args.Scraper.DownloadReplaysTo, replay.ID)); err != nil {
-				log.Errorf("Failed to save replay ID %d: %+v\n", replay.ID, err)
-				continue
-			}
-		}
+		// 	if err = replayFile.SaveTo(fmt.Sprintf("%s/replay_%d.wowsreplay", args.Scraper.DownloadReplaysTo, replay.ID)); err != nil {
+		// 		log.Errorf("Failed to save replay ID %d: %+v\n", replay.ID, err)
+		// 		continue
+		// 	}
+		// }
 	}
 }
