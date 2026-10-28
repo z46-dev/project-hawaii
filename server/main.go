@@ -10,9 +10,9 @@ import (
 
 type (
 	AccountOperationalArguments struct {
-		RealmID                 string `arg:"positional"`
-		Username                string `arg:"positional"`
-		PasswordExpirationHours int    `arg:"--password-expiration-hours" default:"3"`
+		RealmID                 string `arg:"positional" help:"The realm ID of the account"`
+		Username                string `arg:"positional" help:"The username of the account"`
+		PasswordExpirationHours int    `arg:"-e,--password-expiration-hours" default:"3" help:"The number of hours before the password expires"`
 	}
 
 	CreatePasswordResetArguments struct {
@@ -21,13 +21,19 @@ type (
 
 	CreateAccountArguments struct {
 		AccountOperationalArguments
-		CreatePasswordReset bool `arg:"--create-password-reset"`
+		CreatePasswordReset bool `arg:"-p,--create-password-reset" help:"Whether to create a password reset for the account"`
+	}
+
+	ScraperArguments struct {
+		Short             bool   `arg:"-s,--short" help:"Prune output to player name, ship name, and result (with damage and frags)"`
+		DownloadReplaysTo string `arg:"-d,--download-replays-to" help:"Download replays to the specified directory"`
 	}
 
 	CliArguments struct {
-		AllowDestructiveMigrations bool                          `arg:"--allow-destructive-migrations"`
-		CreatePasswordReset        *CreatePasswordResetArguments `arg:"subcommand:password_reset"`
-		CreateAccount              *CreateAccountArguments       `arg:"subcommand:create_account"`
+		AllowDestructiveMigrations bool                          `arg:"--allow-destructive-migrations" help:"Whether to allow destructive migrations on the database"`
+		CreatePasswordReset        *CreatePasswordResetArguments `arg:"subcommand:password_reset" help:"Create a password reset for an account"`
+		CreateAccount              *CreateAccountArguments       `arg:"subcommand:create_account" help:"Create an account"`
+		Scraper                    *ScraperArguments             `arg:"subcommand:scraper" help:"Run the scraper"`
 	}
 )
 
@@ -56,6 +62,8 @@ func main() {
 		createAccount(args)
 	case args.CreatePasswordReset != nil:
 		createPasswordReset(args)
+	case args.Scraper != nil:
+		runScraper(args)
 	default:
 		if err = app.Init(log); err != nil {
 			log.Errorf("Failed to init the app: %+v\n", err)
